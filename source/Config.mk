@@ -119,7 +119,7 @@ UPLOAD_CRT_INCLUDES=-I$(UPLOAD_CRT_DIR) \
 CCFLAGS =           -g -Wall -DPAL_OS_HAS_EVENT_INIT
 
 LDFLAGS =           -L$(ROOT_DIR)/mbedtls-2.6.0/library/ 
-LDLIBS  =           -lmbedtls -lmbedx509 -lmbedcrypto
+LDLIBS  =           -lmbedtls -lmbedx509 -lmbedcrypto -lrt
 
 ifeq ($(MAKECMDGOALS), libusb)
 LDFLAGS +=          -L$(PAL_LIBUSB_DIR)/include/

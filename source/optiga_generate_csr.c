@@ -61,11 +61,11 @@
 #include "JSON_parser.h"
 
 
-extern void pal_gpio_init(void);
-extern void pal_gpio_deinit(void);
+extern pal_status_t pal_gpio_init(void);
+extern pal_status_t pal_gpio_deinit(void);
 extern pal_status_t pal_init(void);
-extern ifx_i2c_context_t ifx_i2c_context_1;
-optiga_comms_t optiga_comms = {(void*)&ifx_i2c_context_1, NULL,NULL, OPTIGA_COMMS_SUCCESS};
+extern ifx_i2c_context_t ifx_i2c_context_0;
+optiga_comms_t optiga_comms = {(void*)&ifx_i2c_context_0, NULL,NULL, OPTIGA_COMMS_SUCCESS};
 uint16_t POID = 0;
 
 int __optiga_sign_wrap( void *ctx, mbedtls_md_type_t md_alg,
@@ -151,10 +151,16 @@ static int32_t __optiga_init(void)
 
 	do
 	{
-		pal_gpio_init();
-		pal_os_event_init();
-		if (pal_init() != PAL_STATUS_SUCCESS)
+		int32_t gpio_status = pal_gpio_init();
+		
+		printf("gpio init status 0x%04X\n\r", gpio_status);
+		gpio_status = pal_os_event_init();
+		printf("os_event_init status 0x%04X\n\r", gpio_status);
+		int32_t pal_status = pal_init();
+		if (pal_status != PAL_STATUS_SUCCESS) {
+			printf( "Failure: pal_init(): 0x%04X\n\r", pal_status);
 			break;
+		}
 
 		status = optiga_util_open_application(&optiga_comms);
 		if(OPTIGA_LIB_SUCCESS != status)
@@ -280,17 +286,18 @@ int32_t main(int argc, char ** argv)
 	uint16_t public_key_length = 80;
 
 	/* Read configuration file to set data written in CSR */
-	const char *file_str     = NULL;
+	const char *file_str     = "../../IO_files/config.jsn";//NULL;
 	char *subject_name       = 0;
-	const char* output_file  = NULL;
+	const char* output_file  = "test";//NULL;
 	      char* pers         = "csr example app";
 	int c;
 
 	/* Parse arguments of function call */
-	if(argc < 5) {
+	/*if(argc < 5) {
 		usage();
 		return EXIT_FAILURE;
 	}	
+	*/
 	
 	while((c = getopt (argc, argv, "i:o:p:r")) != -1) {
 		switch(c) {
@@ -433,7 +440,7 @@ int32_t main(int argc, char ** argv)
 		mbedtls_printf("ok\n");
 	} while(0);
 	
-	__optiga_deinit();
+	//__optiga_deinit();
     return ret;
 }
 
