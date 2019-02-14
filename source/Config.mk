@@ -43,7 +43,8 @@ OPTIGA_SOURCES =    $(OPTIGA_CORE_DIR)/crypt/optiga_crypt.c \
 					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_config.c \
 					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_data_link_layer.c \
 					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_physical_layer.c \
-					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_transport_layer.c
+					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_transport_layer.c \
+					$(OPTIGA_CORE_DIR)/../examples/optiga/example_optiga_crypt_ecdsa_sign.c
 
 # OPTIGA(TM) Trust X header file dependencies					
 OPTIGA_INCLUDES =  -I$(OPTIGA_CORE_DIR)/include/
@@ -116,6 +117,10 @@ UPLOAD_CRT_SOURCES=	$(UPLOAD_CRT_DIR)/optiga_upload_crt.c
 UPLOAD_CRT_INCLUDES=-I$(UPLOAD_CRT_DIR) \
                     -I$(ROOT_DIR)/mbedtls-2.6.0/include
 					
+SIGN_DIR= $(ROOT_DIR)/optiga_trust_x/examples/optiga
+SIGN_SOURCES= $(SIGN_DIR)/example_optiga_crypt_ecdsa_sign.c
+SIGN_INCLUDES= $(OPTIGA_INCLUDES)
+
 CCFLAGS =           -g -Wall -DPAL_OS_HAS_EVENT_INIT
 
 LDFLAGS =           -L$(ROOT_DIR)/mbedtls-2.6.0/library/ 

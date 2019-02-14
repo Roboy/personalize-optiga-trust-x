@@ -75,12 +75,13 @@ endif
 
 GEN_CSR_OBJECTS =		$(patsubst %.c, $(BUILD_DIR)/%.o, $(GEN_CSR_SOURCES))
 UPLOAD_CRT_OBJECTS =	$(patsubst %.c, $(BUILD_DIR)/%.o, $(UPLOAD_CRT_SOURCES))
+SIGN_OBJECTS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(SIGN_SOURCES))
 
 .PHONY: mkdirs all clean linux libusb cp_lib
 
 all: libusb
 
-linux:  mkdirs mbedtls $(BUILD_DIR)/optiga_generate_csr $(BUILD_DIR)/optiga_upload_crt cp_lib
+linux:  mkdirs mbedtls $(BUILD_DIR)/liboptiga.so cp_lib 
 libusb: mkdirs mbedtls $(BUILD_DIR)/optiga_generate_csr $(BUILD_DIR)/optiga_upload_crt cp_lib
 
 #Make application note
@@ -93,25 +94,40 @@ mkdirs:
 	
 cp_lib:
 	-$(COPY) $(PAL_LIBUSB_DIR)/include/libusb-1.0.dll  $(BIN_DIR)/
-	$(COPY) $(BUILD_DIR)/optiga_generate_csr  $(BIN_DIR)/
-	$(COPY) $(BUILD_DIR)/optiga_upload_crt  $(BIN_DIR)/
+#	$(COPY) $(BUILD_DIR)/optiga_generate_csr  $(BIN_DIR)/
+#	$(COPY) $(BUILD_DIR)/optiga_upload_crt  $(BIN_DIR)/
 		
 mbedtls:
 	$(MAKE) -C $(ROOT_DIR)/mbedtls-2.6.0/ no_test
 
 $(BUILD_DIR)/%.o: %.c
-	@echo Compiling $<
+	@echo Compiling now $<
 	@mkdir -p $(dir $@)
 	@$(CC) $(CCFLAGS) $(INCLUDES) $(PAL_LIBUSB_INCLUDES) $(PAL_LINUX_INCLUDES) $(GEN_CSR_INCLUDES) -c $< -o $@
 
-$(BUILD_DIR)/optiga_generate_csr: $(OPTIGA_CORE_OBJECTS) $(PAL_OBJECTS) $(GEN_CSR_OBJECTS)
-	@echo Linking $@
-	@$(CC) $^ $(LDFLAGS) $(LDLIBS) -lrt -o $@
+$(BUILD_DIR)/examples/optiga/example_optiga_crypt_ecdsa_sign.o: examples/optiga/example_optiga_crypt_ecdsa_sign.c
+	@echo Compiling $<
+	@mkdir -p $(dir $@)
+	@$(CC) $(CCFLAGS) $(INCLUDES) $(PAL_LIBUSB_INCLUDES) $(PAL_LINUX_INCLUDES) $(SIGN_INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/liboptiga.so: $(OPTIGA_CORE_OBJECTS) $(PAL_OBJECTS)   
+	@echo objects: $(OPTIGA_CORE_OBJECTS)
+	@echo liboptiga: Linking $@
+	@$(CC) $^ -L/home/pi/workspace/personalize-optiga-trust-x/source/mbedtls-2.6.0/library/ $(CCFLAGS) $(LDLIBS) $(PAL_LINUX_INCLUDES) $(INCLUDES) $(SIGN_INCLUDES) -shared -lrt -o $@
 	
-$(BUILD_DIR)/optiga_upload_crt: $(OPTIGA_CORE_OBJECTS) $(PAL_OBJECTS) $(UPLOAD_CRT_OBJECTS)
-	@echo Linking $@
-	@$(CC) $^ $(LDFLAGS) $(LDLIBS) -o $@
 	
+#$(BUILD_DIR)/optiga_generate_csr: $(OPTIGA_CORE_OBJECTS) $(PAL_OBJECTS) $(GEN_CSR_OBJECTS)
+#	@echo Linking $@
+#	@$(CC) $^ $(LDFLAGS) $(LDLIBS) -lrt -o $@
+	
+#$(BUILD_DIR)/optiga_upload_crt: $(OPTIGA_CORE_OBJECTS) $(PAL_OBJECTS) $(UPLOAD_CRT_OBJECTS)
+#	@echo Linking $@
+#	@$(CC) $^ $(LDFLAGS) $(LDLIBS) -o $@
+
+#$(BUILD_DIR)/optiga_upload_crt: $(OPTIGA_CORE_OBJECTS) $(PAL_OBJECTS) $(SIGN_OBJECTS)
+#	@echo Linking $@
+#	@$(CC) $^ $(LDFLAGS) $(LDLIBS) -o $@
+
 #Clean
 clean: 
 	-$(CLEAN) -rf $(BUILD_DIR) $(BIN_DIR)
