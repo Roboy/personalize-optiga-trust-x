@@ -44,10 +44,15 @@ OPTIGA_SOURCES =    $(OPTIGA_CORE_DIR)/crypt/optiga_crypt.c \
 					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_data_link_layer.c \
 					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_physical_layer.c \
 					$(OPTIGA_CORE_DIR)/comms/ifx_i2c/ifx_i2c_transport_layer.c \
-					$(OPTIGA_CORE_DIR)/../examples/optiga/example_optiga_crypt_ecdsa_sign.c
+					$(OPTIGA_CORE_DIR)/../examples/optiga/example_optiga_crypt_ecdsa_sign.c \
+					$(OPTIGA_CORE_DIR)/../examples/optiga/example_optiga_util_read_data.c \
+					$(OPTIGA_CORE_DIR)/../examples/authenticate_chip/example_authenticate_chip.c \
+					$(OPTIGA_CORE_DIR)/../examples/ecdsa_utils/asn1_to_ecdsa_rs.c 
+					# $(OPTIGA_CORE_DIR)/../examples/authenticate_chip/pal_crypt_mbedtls.c
 
-# OPTIGA(TM) Trust X header file dependencies					
+# OPTIGA(TM) Trust X header file dependencies
 OPTIGA_INCLUDES =  -I$(OPTIGA_CORE_DIR)/include/
+OPENSSL_INCLUDES = -Iopenssl/openssl-1.1.0j/include
 
 # Directory with the Platform Abstraction Layer (PAL) for OPTIGA(TM) Trust X
 PAL_LINUX_DIR = 	$(ROOT_DIR)/optiga_trust_x/pal/linux
@@ -60,12 +65,12 @@ PAL_LINUX_SOURCES = $(OPTIGA_CORE_DIR)/comms/optiga_comms.c \
 					$(PAL_LINUX_DIR)/pal_ifx_i2c_config.c \
 					$(PAL_LINUX_DIR)/pal_os_event.c \
 					$(PAL_LINUX_DIR)/pal_os_lock.c \
-					$(PAL_LINUX_DIR)/pal_os_timer.c 
+					$(PAL_LINUX_DIR)/pal_os_timer.c
 
-# Platform Abstraction Layer (PAL) header file dependencies					
+# Platform Abstraction Layer (PAL) header file dependencies
 PAL_LINUX_INCLUDES =-I$(OPTIGA_CORE_DIR)/include/pal/ \
 					-I$(PAL_LINUX_DIR)/
-					
+
 # Directory with the Platform Abstraction Layer (PAL) for OPTIGA(TM) Trust X
 PAL_LIBUSB_DIR = 	$(ROOT_DIR)/optiga_trust_x/pal/libusb
 
@@ -81,10 +86,10 @@ PAL_LIBUSB_SOURCES =$(PAL_LIBUSB_DIR)/optiga_comms_ifx_i2c_usb.c \
 					$(PAL_LIBUSB_DIR)/pal_os_timer.c
 					#$(PAL_LIBUSB_DIR)/usb_lib_loader.c
 
-# Platform Abstraction Layer (PAL) header file dependencies					
+# Platform Abstraction Layer (PAL) header file dependencies
 PAL_LIBUSB_INCLUDES =-I$(OPTIGA_CORE_DIR)/include/pal/ \
 					 -I$(PAL_LIBUSB_DIR)/include/
-					
+
 ##############################################################
 
 # Directory with JSON parser files
@@ -93,7 +98,7 @@ JSON_DIR = 			$(ROOT_DIR)/json_parser
 # JSON parser source code files to be built
 JSON_SOURCES =		$(JSON_DIR)/cJSON.c \
 					$(JSON_DIR)/JSON_parser.c
-					
+
 # JSON parser includes
 JSON_INCLUDES =		-I$(JSON_DIR)
 
@@ -101,9 +106,9 @@ JSON_INCLUDES =		-I$(JSON_DIR)
 GEN_CSR_DIR = 		$(ROOT_DIR)
 
 # Generate CSR application source code files to be built
-GEN_CSR_SOURCES=	$(GEN_CSR_DIR)/optiga_generate_csr.c 
+GEN_CSR_SOURCES=	$(GEN_CSR_DIR)/optiga_generate_csr.c
 
-# Generate CSR application header file dependencies					
+# Generate CSR application header file dependencies
 GEN_CSR_INCLUDES=	-I$(GEN_CSR_DIR) \
                     -I$(ROOT_DIR)/mbedtls-2.6.0/include
 
@@ -111,20 +116,20 @@ GEN_CSR_INCLUDES=	-I$(GEN_CSR_DIR) \
 UPLOAD_CRT_DIR = 	$(ROOT_DIR)
 
 # Generate CSR application source code files to be built
-UPLOAD_CRT_SOURCES=	$(UPLOAD_CRT_DIR)/optiga_upload_crt.c 
+UPLOAD_CRT_SOURCES=	$(UPLOAD_CRT_DIR)/optiga_upload_crt.c
 
-# Generate CSR application header file dependencies					
+# Generate CSR application header file dependencies
 UPLOAD_CRT_INCLUDES=-I$(UPLOAD_CRT_DIR) \
                     -I$(ROOT_DIR)/mbedtls-2.6.0/include
-					
+
 SIGN_DIR= $(ROOT_DIR)/optiga_trust_x/examples/optiga
 SIGN_SOURCES= $(SIGN_DIR)/example_optiga_crypt_ecdsa_sign.c
 SIGN_INCLUDES= $(OPTIGA_INCLUDES)
 
 CCFLAGS =           -g -Wall -DPAL_OS_HAS_EVENT_INIT
 
-LDFLAGS =           -L$(ROOT_DIR)/mbedtls-2.6.0/library/ 
-LDLIBS  =           -lmbedtls -lmbedx509 -lmbedcrypto -lrt
+LDFLAGS =           -L$(ROOT_DIR)/mbedtls-2.6.0/library/ -Lopenssl/openssl-0.9.8k/
+LDLIBS  =           -lmbedtls -lmbedx509 -lmbedcrypto -lrt -lssl -lcrypto
 
 ifeq ($(MAKECMDGOALS), libusb)
 LDFLAGS +=          -L$(PAL_LIBUSB_DIR)/include/
@@ -142,8 +147,7 @@ INCLUDES := 		$(OPTIGA_INCLUDES) \
 					$(JSON_INCLUDES)
 
 #Commands, compiler configuration
-#CC = C:\SysGCC\Raspberry\bin\arm-linux-gnueabihf-gcc.exe 
+#CC = C:\SysGCC\Raspberry\bin\arm-linux-gnueabihf-gcc.exe
 CLEAN = rm
 MKDIR = mkdir
 COPY = cp
-
